@@ -13,6 +13,36 @@ import requests
 
 from SecuritySm import get_d_id
 
+#微信推送
+appID='wx9b936d8a3a9f8c60'
+appsecret='3219a6ec392c62f198b226d4497acd20'
+trouser='ounvt6KoVCBDvr8E3hEuEfstJ7bg'
+template_id='obezXb6sjHy1TboN5UKAyvLA_rSEPImStCKbPiSOpcQ'
+def get_access_token():
+    # 获取access token的url
+    url = f'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={appID}&secret={appsecret}'
+    response = requests.get(url).json()
+    print(response)
+    access_token = response.get('access_token')
+    return access_token
+
+def send(txt):
+    body = {
+        "touser": trouser,
+        "template_id": template_id,
+        "url": "https://www.xjyzs.us.kg",
+        "data": {
+            "text": {
+                "value": txt
+            }
+        }
+    }
+    url = f'https://api.weixin.qq.com/cgi-bin/message/template/send?access_token={get_access_token()}'
+    print(requests.post(url, json.dumps(body)).text)
+
+
+
+
 token_save_name = 'TOKEN.txt'
 app_code = '4ca99fa6b56cc2ba'
 token_env = os.environ.get('TOKEN')
@@ -242,13 +272,13 @@ def do_sign(cred_resp):
                              json=body).json()
         if resp['code'] != 0:
             print(f'角色{i.get("nickName")}({i.get("channelName")})签到失败了！原因：{resp.get("message")}')
+            send(f'角色{i.get("nickName")}({i.get("channelName")})签到失败了！原因：{resp.get("message")}')
             continue
         awards = resp['data']['awards']
         for j in awards:
             res = j['resource']
-            print(
-                f'角色{i.get("nickName")}({i.get("channelName")})签到成功，获得了{res["name"]}×{j.get("count") or 1}'
-            )
+            print(f'角色{i.get("nickName")}({i.get("channelName")})签到成功，获得了{res["name"]}×{j.get("count") or 1}')
+            send(f'角色{i.get("nickName")}({i.get("channelName")})签到成功，获得了{res["name"]}×{j.get("count") or 1}')
 
 
 def save(token):
